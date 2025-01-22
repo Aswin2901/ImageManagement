@@ -4,9 +4,21 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ('full_name', 'email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        # Password confirmation check
+        password = validated_data['password']
+        confirm_password = validated_data['password']  # Assuming `confirm_password` is part of the same input
+        
+        if password != confirm_password:
+            raise serializers.ValidationError({'non_field_errors': 'Passwords do not match'})
+        
+        user = User(
+            full_name=validated_data['full_name'],
+            email=validated_data['email'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
         return user
