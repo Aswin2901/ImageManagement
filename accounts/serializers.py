@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User , ImageUpload
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
+class ImageUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageUpload
+        fields = ['id', 'image', 'title', 'created_at', 'updated_at']
