@@ -15,6 +15,8 @@ from rest_framework.decorators import api_view , parser_classes
 from django.http import JsonResponse
 from rest_framework.parsers import MultiPartParser, FormParser
 import json
+from django.contrib.auth.hashers import check_password, make_password
+
 
 class RegisterView(APIView):
     def post(self, request):
@@ -180,3 +182,32 @@ def update_image_order(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+@api_view(['GET'])
+def user_details(request, user_id):
+    user = User.objects.get(id=user_id)
+    return Response({
+        'name': user.full_name,
+        'email': user.email,
+    })
+
+
+@api_view(['POST'])
+def change_password(request, user_id):
+    user = User.objects.get(id=user_id)
+    old_password = request.data.get('old_password')
+    new_password = request.data.get('new_password')
+
+    # Check if old password is correct
+    if not check_password(old_password, user.password):
+        return JsonResponse({'error': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validate new password (You can add more password validation here)
+    if len(new_password) < 8:
+        return JsonResponse({'error': 'New password must be at least 8 characters'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update password
+    user.password = make_password(new_password)
+    user.save()
+
+    return JsonResponse({'message': 'Password updated successfully'})
