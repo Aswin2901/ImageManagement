@@ -70,11 +70,9 @@ class CustomLoginView(APIView):
 @api_view(['GET'])
 def image_get_view(request , user_id):
     if request.method == 'GET':
-        print('user :' , user_id)
         user = User.objects.get(id = user_id)
         images = ImageUpload.objects.filter(user=user)
         serializer = ImageUploadSerializer(images, many=True)
-        print("serializer" , serializer.data)
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     
 @api_view(['POST'])
@@ -126,25 +124,35 @@ def image_post_view(request, user_id):
     return JsonResponse({"error": "Invalid request method."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ImageEditDeleteView(APIView):
 
-    def put(self, request, pk):
-        try:
-            image = ImageUpload.objects.get(pk=pk, user=request.user)
-        except ImageUpload.DoesNotExist:
-            return Response({"error": "Image not found."}, status=404)
+@api_view(['PATCH'])
+def Edit_view(request, pk):
+    try:
+        image = ImageUpload.objects.get(pk=pk)
+    except ImageUpload.DoesNotExist:
+        return Response({"error": "Image not found."}, status=404)
 
-        serializer = ImageUploadSerializer(image, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    serializer = ImageUploadSerializer(image, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
 
-    def delete(self, request, pk):
-        try:
-            image = ImageUpload.objects.get(pk=pk, user=request.user)
-        except ImageUpload.DoesNotExist:
-            return Response({"error": "Image not found."}, status=404)
 
+@api_view(['DELETE'])
+def delete_view(request, pk):
+    print('into')
+    try:
+        # Retrieve the image by its primary key
+        image = ImageUpload.objects.get(pk=pk)
+        print('image : ' , image)
+
+        # Delete the image
         image.delete()
-        return Response({"message": "Image deleted successfully."}, status=204)
+        return Response({"message": "Image deleted successfully."}, status=200)
+
+    except ImageUpload.DoesNotExist:
+        return Response({"error": "Image not found."}, status=404)
+
+    except Exception as e:
+        return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
