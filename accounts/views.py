@@ -71,7 +71,7 @@ class CustomLoginView(APIView):
 def image_get_view(request , user_id):
     if request.method == 'GET':
         user = User.objects.get(id = user_id)
-        images = ImageUpload.objects.filter(user=user)
+        images = ImageUpload.objects.filter(user=user).order_by('order')
         serializer = ImageUploadSerializer(images, many=True)
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     
@@ -156,3 +156,27 @@ def delete_view(request, pk):
 
     except Exception as e:
         return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+    
+@api_view(['POST'])
+def update_image_order(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_id = data.get("user_id")
+            images = data.get("images", [])
+
+            if not user_id or not images:
+                return JsonResponse({"error": "Invalid data"}, status=400)
+
+            for item in images:
+                image_id = item.get("id")
+                order = item.get("order")
+
+                if image_id is not None and order is not None:
+                    ImageUpload.objects.filter(id=image_id, user_id=user_id).update(order=order)
+
+            return JsonResponse({"message": "Image order updated successfully"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
