@@ -64,6 +64,10 @@ CORS_ALLOWED_ORIGINS = [
     'https://vercel.com/aswin-v-gopals-projects/image-management-frontend',
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
