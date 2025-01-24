@@ -61,7 +61,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000', 
-    'https://vercel.com/aswin-v-gopals-projects/image-management-frontend',
+    "https://image-management-frontend-1d5d1xic8-aswin-v-gopals-projects.vercel.app",
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
