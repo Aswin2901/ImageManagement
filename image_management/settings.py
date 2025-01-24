@@ -60,7 +60,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # React frontend
+    'http://localhost:3000', 
+    'https://vercel.com/aswin-v-gopals-projects/image-management-frontend',
 ]
 
 REST_FRAMEWORK = {
