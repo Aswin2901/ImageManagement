@@ -18,7 +18,8 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = [
     "imagemanagement-tymu.onrender.com",  # Add your Render backend host
     "localhost",  # Localhost for local development
-    "127.0.0.1",  # Local testing
+    "127.0.0.1",
+    "image-management-frontend-five.vercel.app",
 ]
 
 # Application definition
@@ -68,7 +69,7 @@ CORS_ALLOW_METHODS = [
 
 
 
-CORS_ALLOW_CREDENTIALS = True  # Allow credentials (for authentication, cookies, etc.)
+CORS_ALLOW_CREDENTIALS = True  
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
