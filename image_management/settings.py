@@ -120,11 +120,14 @@ WSGI_APPLICATION = 'image_management.wsgi.application'
 
 # Database configuration
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgresql://image_management_user:G3PSEfrldly30VqHHQRRAKgzsoBklucN@dpg-cu9su8dumphs73cgso2g-a.oregon-postgres.render.com/image_management"),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+    'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    'NAME': 'myproject',
+    'USER': 'myprojectuser',
+    'PASSWORD': 'password',
+    'HOST': 'localhost',
+    'PORT': '',
+    }
 }
 
 # Password validation
