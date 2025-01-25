@@ -120,7 +120,7 @@ WSGI_APPLICATION = 'image_management.wsgi.application'
 # Database configuration
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgresql://image_management_user:G3PSEfrldly30VqHHQRRAKgzsoBklucN@dpg-cu9su8dumphs73cgso2g-a/image_management"),
+        default=os.getenv("DATABASE_URL", "postgresql://image_management_user:G3PSEfrldly30VqHHQRRAKgzsoBklucN@dpg-cu9su8dumphs73cgso2g-a.oregon-postgres.render.com/image_management"),
         conn_max_age=600,
         ssl_require=True
     )
@@ -150,13 +150,18 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory for static files in production
 
 # Collect static files
 if not DEBUG:
-    os.makedirs(STATIC_ROOT, exist_ok=True)
-
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
+    
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
