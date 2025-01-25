@@ -1,28 +1,27 @@
 from pathlib import Path
 import os
 import dj_database_url
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j@hy7=0sbstj1k@jt5fb=hvoxanf#4n4bvu@f@51fx*@7@t91#'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j@hy7=0sbstj1k@jt5fb=hvoxanf#4n4bvu@f@51fx*@7@t91#')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 
 ALLOWED_HOSTS = [
-    "imagemanagement-zy2e.onrender.com",  # Add your production host here
+    "imagemanagement-zy2e.onrender.com",  # Add your Render backend host
     "localhost",  # Localhost for local development
-    "127.0.0.1",  # 127.0.0.1 for local testing
+    "127.0.0.1",  # Local testing
 ]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,20 +51,12 @@ MIDDLEWARE = [
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',  # For local development
-    "https://image-management-frontend-1d5d1xic8-aswin-v-gopals-projects.vercel.app",  # Actual production frontend
+    'https://image-management-frontend-five.vercel.app',  # Update with your frontend's Vercel production URL
 ]
 
-# Allow methods and headers for CORS
-CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-]
+CORS_ALLOW_CREDENTIALS = True  # Allow credentials (for authentication, cookies, etc.)
 
-CORS_ALLOW_HEADERS = [
+CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
     'authorization',
     'x-csrftoken',
@@ -75,10 +66,8 @@ CORS_ALLOW_HEADERS = [
     'referer',
 ]
 
-# Disable SSL redirect for local development
-if DEBUG:
-    SECURE_SSL_REDIRECT = False
-
+# Force HTTPS in production
+SECURE_SSL_REDIRECT = not DEBUG
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # REST Framework settings
@@ -114,17 +103,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 WSGI_APPLICATION = 'image_management.wsgi.application'
 
-
 # Database configuration
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "postgresql://image_management_user:G3PSEfrldly30VqHHQRRAKgzsoBklucN@dpg-cu9su8dumphs73cgso2g-a.oregon-postgres.render.com/image_management"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
-
-# Use PostgreSQL database in production
-DATABASES['default'] = dj_database_url.parse("postgresql://image_management_user:G3PSEfrldly30VqHHQRRAKgzsoBklucN@dpg-cu9su8dumphs73cgso2g-a.oregon-postgres.render.com/image_management")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -142,7 +128,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -152,6 +137,26 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory for static files in production
+
+# Collect static files
+if not DEBUG:
+    os.makedirs(STATIC_ROOT, exist_ok=True)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging for debugging purposes
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
