@@ -49,10 +49,22 @@ MIDDLEWARE = [
 ]
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # For local development
-    'https://image-management-frontend-five.vercel.app',  # Update with your frontend's Vercel production URL
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',  # For local development
+#     'https://image-management-frontend-five.vercel.app', 
+#     ]
+
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
 ]
+
+
 
 CORS_ALLOW_CREDENTIALS = True  # Allow credentials (for authentication, cookies, etc.)
 
