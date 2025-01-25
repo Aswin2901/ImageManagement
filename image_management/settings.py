@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j@hy7=0sbstj1k@jt5fb=hvoxa
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 
 ALLOWED_HOSTS = [
-    "imagemanagement-zy2e.onrender.com",  # Add your Render backend host
+    "imagemanagement-tymu.onrender.com",  # Add your Render backend host
     "localhost",  # Localhost for local development
     "127.0.0.1",  # Local testing
 ]
