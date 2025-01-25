@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Should be above CommonMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,6 +56,7 @@ MIDDLEWARE = [
 #     ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
+
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
