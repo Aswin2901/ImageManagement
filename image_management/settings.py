@@ -121,12 +121,12 @@ WSGI_APPLICATION = 'image_management.wsgi.application'
 # Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Use the PostgreSQL backend
-        'NAME': 'myproject',  # Name of your database
-        'USER': 'myprojectuser',  # Database user you configured
-        'PASSWORD': 'password',  # Password for the database user
-        'HOST': 'localhost',  # Host of your PostgreSQL server (use 'localhost' for the same machine)
-        'PORT': '5432',  # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.postgresql', 
+        'NAME': 'myproject',
+        'USER': 'myprojectuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost', 
+        'PORT': '5432',  
     }
 }
 
