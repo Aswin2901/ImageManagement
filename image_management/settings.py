@@ -13,10 +13,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j@hy7=0sbstj1k@jt5fb=hvoxanf#4n4bvu@f@51fx*@7@t91#')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
+# DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
+
+DEBUG = True
 
 ALLOWED_HOSTS = [
-    "imagemanagement-tymu.onrender.com",  # Add your Render backend host
+    ".vercel.app",
+    ".now.sh",
     "localhost",  # Localhost for local development
     "127.0.0.1",
     "image-management-frontend-five.vercel.app",
@@ -41,7 +44,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Should be above CommonMiddleware
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -51,39 +53,10 @@ MIDDLEWARE = [
 ]
 
 # CORS settings
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',  # For local development
-#     'https://image-management-frontend-five.vercel.app', 
-#     ]
-
-CORS_ALLOW_ALL_ORIGINS = True 
-
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
-]
-
-
-
-CORS_ALLOW_CREDENTIALS = True  
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'content-type',
-    'authorization',
-    'x-csrftoken',
-    'accept',
-    'origin',
-    'user-agent',
-    'referer',
-]
-
-# Force HTTPS in production
-SECURE_SSL_REDIRECT = not DEBUG
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # For local development
+    'https://image-management-frontend-five.vercel.app', 
+    ]
 
 # REST Framework settings
 REST_FRAMEWORK = {
@@ -153,33 +126,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory for static files in production
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "ui/static")]
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "ui/staticfiles")
 
-# Collect static files
-if not DEBUG:
-    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
-    # and renames the files with unique names for each version to support long-term caching
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     
     
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Logging for debugging purposes
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
-}
