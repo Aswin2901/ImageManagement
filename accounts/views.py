@@ -194,7 +194,6 @@ def update_image_order(request):
 @permission_classes([IsAuthenticated]) 
 def user_details(request):
     user = request.user
-    user = User.objects.get(user=user)
     return Response({
         'name': user.full_name,
         'email': user.email,
@@ -205,7 +204,6 @@ def user_details(request):
 @permission_classes([IsAuthenticated]) 
 def change_password(request):
     user = request.user
-    user = User.objects.get(user=user)
     old_password = request.data.get('old_password')
     new_password = request.data.get('new_password')
 
