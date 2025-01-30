@@ -191,8 +191,10 @@ def update_image_order(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 @api_view(['GET'])
-def user_details(request, user_id):
-    user = User.objects.get(id=user_id)
+@permission_classes([IsAuthenticated]) 
+def user_details(request):
+    user = request.user
+    user = User.objects.get(user=user)
     return Response({
         'name': user.full_name,
         'email': user.email,
@@ -200,8 +202,10 @@ def user_details(request, user_id):
 
 
 @api_view(['POST'])
-def change_password(request, user_id):
-    user = User.objects.get(id=user_id)
+@permission_classes([IsAuthenticated]) 
+def change_password(request):
+    user = request.user
+    user = User.objects.get(user=user)
     old_password = request.data.get('old_password')
     new_password = request.data.get('new_password')
 
