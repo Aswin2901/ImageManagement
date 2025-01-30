@@ -14,59 +14,71 @@ from rest_framework import status
 from rest_framework.decorators import api_view , parser_classes
 from django.http import JsonResponse
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.contrib.auth import get_user_model
 import json
 from django.contrib.auth.hashers import check_password, make_password
 
 
+User = get_user_model()
+
+# 🔹 Register View (with JWT tokens)
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
-        return Response(serializer.errors, status=400)
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": getattr(user, 'full_name', None),
+                    "phone": getattr(user, 'phone', None),
+                }
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# 🔹 Login View (JWT-based authentication)
 class CustomLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        
-        print('email :' , email , password)
 
-        # Check if the user exists
+        # Check if user exists
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=400)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate the password
+        # Validate password
         if not check_password(password, user.password):
-            return Response({'error': 'Invalid credentials'}, status=400)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        # Update the user's last login
+        # Update last login time
         update_last_login(None, user)
 
-        # Build the response
-        response_data = {
+        return Response({
             'access': access_token,
             'refresh': refresh_token,
             'user': {
-                'id':user.id,
+                'id': user.id,
                 'email': user.email,
-                'phone': getattr(user, 'phone', None),
                 'full_name': getattr(user, 'full_name', None),
+                'phone': getattr(user, 'phone', None),
             }
-        }
-
-        return Response(response_data)
+        }, status=status.HTTP_200_OK)
     
     
 @api_view(['GET'])
