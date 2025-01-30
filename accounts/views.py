@@ -11,7 +11,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.hashers import check_password
 from .models import User , ImageUpload
 from rest_framework import status
-from rest_framework.decorators import api_view , parser_classes
+from rest_framework.decorators import api_view , parser_classes , permission_classes
 from django.http import JsonResponse
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
@@ -82,22 +82,27 @@ class CustomLoginView(APIView):
     
     
 @api_view(['GET'])
-def image_get_view(request , user_id):
-    if request.method == 'GET':
-        user = User.objects.get(id = user_id)
+@permission_classes([IsAuthenticated]) 
+def image_get_view(request):
+    try:
+        user = request.user  
         images = ImageUpload.objects.filter(user=user).order_by('order')
         serializer = ImageUploadSerializer(images, many=True)
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['POST'])
-def image_post_view(request, user_id):
+@permission_classes([IsAuthenticated])  # Ensure user is authenticated
+def image_post_view(request):
     if request.method == 'POST':
         try:
-            # Access files and titles from the request
-            images = request.FILES.getlist('files')  # Fetch all uploaded files
-            titles = request.POST.getlist('titles')  # Fetch all titles
+            # Get the logged-in user from the token
+            user = request.user
 
-            print('images:', images, 'titles:', titles)
+            # Access files and titles from the request
+            images = request.FILES.getlist('files')  
+            titles = request.POST.getlist('titles')  
 
             if not images or not titles:
                 return JsonResponse(
@@ -111,9 +116,6 @@ def image_post_view(request, user_id):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Get the user instance
-            user = User.objects.get(id=user_id)
-
             # Create ImageUpload objects
             uploaded_images = []
             for image_file, title in zip(images, titles):
@@ -124,11 +126,6 @@ def image_post_view(request, user_id):
             serializer = ImageUploadSerializer(uploaded_images, many=True)
             return JsonResponse(serializer.data, safe=False, status=status.HTTP_201_CREATED)
 
-        except User.DoesNotExist:
-            return JsonResponse(
-                {"error": "User not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
         except Exception as e:
             return JsonResponse(
                 {"error": str(e)},
@@ -136,8 +133,6 @@ def image_post_view(request, user_id):
             )
 
     return JsonResponse({"error": "Invalid request method."}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 @api_view(['PATCH'])
 def Edit_view(request, pk):
