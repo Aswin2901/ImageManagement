@@ -17,6 +17,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 import json
 from django.contrib.auth.hashers import check_password, make_password
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
 
 
 User = get_user_model()
@@ -166,29 +168,35 @@ def delete_view(request, pk):
     except Exception as e:
         return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
     
+@csrf_exempt
 @api_view(['POST'])
 def update_image_order(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_id = data.get("user_id")
-            images = data.get("images", [])
+    try:
+        data = json.loads(request.body)
+        user_id = request.user.id
+        images = data.get("images", [])
 
-            if not user_id or not images:
-                return JsonResponse({"error": "Invalid data"}, status=400)
+        if not user_id or not images:
+            return JsonResponse({"error": "Invalid data"}, status=400)
 
-            for item in images:
-                image_id = item.get("id")
-                order = item.get("order")
+        image_instances = []
+        for item in images:
+            image_id = item.get("id")
+            order = item.get("order")
 
-                if image_id is not None and order is not None:
-                    ImageUpload.objects.filter(id=image_id, user_id=user_id).update(order=order)
+            if image_id is not None and order is not None:
+                image_instances.append(ImageUpload(id=image_id, user_id=user_id, order=order))
 
-            return JsonResponse({"message": "Image order updated successfully"}, status=200)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+        if image_instances:
+            with transaction.atomic():  # Ensures all updates are done in a single transaction
+                ImageUpload.objects.bulk_update(image_instances, ['order'])
 
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+        return JsonResponse({"message": "Image order updated successfully"}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
